@@ -1,0 +1,9 @@
+{
+  "status": 400,
+  "content_type": "application/json",
+  "body": {
+    "code": "not_workflow_app",
+    "message": "Please check if your app mode matches the right API route.",
+    "status": 400
+  }
+}

@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-dify",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Dify in Gladys Assistant: run workflows, chat apps and agents from a scene, follow each app.",
   "type": "module",
   "main": "index.js",
   "scripts": {

@@ -1,0 +1,23 @@
+{
+  "status": 200,
+  "content_type": "application/json; charset=utf-8",
+  "body": {
+    "task_id": "455a39ce-9066-4352-a97d-98be928a4ed7",
+    "workflow_run_id": "04959f3e-ed92-45bf-885e-6f8900ae4420",
+    "data": {
+      "id": "04959f3e-ed92-45bf-885e-6f8900ae4420",
+      "workflow_id": "ac849f72-e210-435d-87c0-9f96b75ea466",
+      "status": "succeeded",
+      "outputs": {
+        "room": "kitchen",
+        "temperature": null
+      },
+      "error": null,
+      "elapsed_time": 0.2115505919791758,
+      "total_tokens": 0,
+      "total_steps": 2,
+      "created_at": 1795347122,
+      "finished_at": 1795347122
+    }
+  }
+}
