@@ -58,7 +58,10 @@ export const APP_MODES = Object.freeze({
 
 export const CHAT_MODES = [APP_MODES.ADVANCED_CHAT, APP_MODES.CHAT, APP_MODES.AGENT_CHAT];
 
-const clean = (text) => String(text).replace(/\s+/g, ' ').trim().slice(0, MAX_SERVER_ERROR);
+const clean = (text) => {
+  const line = String(text).replace(/\s+/g, ' ').trim();
+  return line.length > MAX_SERVER_ERROR ? `${line.slice(0, MAX_SERVER_ERROR - 1)}…` : line;
+};
 
 /** The kind of a Dify error answer `{ code, message, status }`. */
 function kindOf(status, code) {

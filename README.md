@@ -95,8 +95,8 @@ On 22/11/2026 the integration was checked against a real Dify 1.20.0
 without model: a workflow (Start → End), a workflow whose Code node fails, and
 a chatflow (Start → Answer). Its answers are the fixtures of the tests
 (`test/fixtures/dify/`): a run, a failed run, a missing input, a conversation
-continued, an unknown conversation (404), a wrong key (401), a wrong route
-(400). The Docker image of the integration was run with the Gladys sandbox
+continued, an unknown conversation (404), a wrong key (401), a deleted app (403), a
+wrong route (400), a run past the wait. The Docker image of the integration was run with the Gladys sandbox
 constraints (read-only root, all capabilities dropped, 256 MB, bridge network)
 against that server and the fake Gladys of the SDK. Not checked: the widget and
 the scene editor in a real Gladys, an app calling a real language model, an

@@ -88,6 +88,9 @@ test('errors: wrong key, wrong route, unknown conversation, not Dify, network', 
     );
   let err = await kind(() => client(replay('info-bad-key')).info());
   assert.equal(err.kind, ERROR_KINDS.AUTH);
+  err = await kind(() => client(replay('info-deleted-app')).info());
+  assert.equal(err.kind, ERROR_KINDS.AUTH);
+  assert.match(err.message, /HTTP 403 forbidden The app no longer exists/);
   assert.ok(!err.message.includes('app-x'));
   err = await kind(() =>
     client(replay('run-on-chat-app')).run({ mode: 'workflow', inputs: {}, timeoutMs: 1000 }),

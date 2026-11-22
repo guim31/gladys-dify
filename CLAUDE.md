@@ -278,8 +278,8 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
   `/v1/workflows/run` en streaming, mais un `workflow_finished` `failed` (« room is required in
   input form ») ; d'où la vérification par `GET /v1/parameters` avant l'exécution. Un nombre
   passé en chaîne (`"21"`) est accepté.
-- Mauvaise route : 400 `not_workflow_app` / `not_chat_app` ; clé invalide ou app supprimée :
-  401 `unauthorized` ; conversation inconnue : 404 `not_found` (l'intégration repart sur une
+- Mauvaise route : 400 `not_workflow_app` / `not_chat_app` ; clé invalide : 401 `unauthorized`, app
+  supprimée : 403 `forbidden` « The app no longer exists. » ; conversation inconnue : 404 `not_found` (l'intégration repart sur une
   nouvelle conversation du même nom). `POST …/tasks/{id}/stop` répond 200 même pour une tâche
   inconnue.
 - Les conversations appartiennent à un utilisateur Dify : tout est fait pour `user: "gladys"`.

@@ -1,0 +1,9 @@
+{
+  "status": 403,
+  "content_type": "application/json",
+  "body": {
+    "code": "forbidden",
+    "message": "The app no longer exists.",
+    "status": 403
+  }
+}
