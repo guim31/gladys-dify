@@ -19,8 +19,8 @@ import { pick } from './texts.js';
 
 // The text block shows the beginning of a long answer.
 export const WIDGET_ANSWER_MAX = 300;
-// Rows of apps in the status list (the configuration holds 10 keys at most).
-export const WIDGET_APPS_MAX = 10;
+// Rows of apps in the status list: the core keeps 10 rows, the server takes one.
+export const WIDGET_APPS_MAX = 9;
 
 export const TEXT = {
   noConfig: {

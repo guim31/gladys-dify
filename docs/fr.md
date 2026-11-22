@@ -115,12 +115,12 @@ en rouge avec sa raison.
 ## Dépannage
 
 - **« Dify ne répond pas »** : vérifiez l'adresse et le port, et que Dify est démarré.
-- **« clé d'API refusée »** : l'app a été supprimée, ou la clé révoquée : créez une nouvelle
+- **« Clé d'API refusée »** : l'app a été supprimée, ou la clé révoquée : créez une nouvelle
   clé.
 - **« Entrée obligatoire manquante »** : le workflow demande cette entrée ; ajoutez-la dans
   **Entrées**.
-- **« l'app n'est pas prête »** : publiez l'app dans Dify.
-- **« l'exécution a échoué dans Dify »** : un nœud a échoué (modèle injoignable, quota, erreur
+- **« L'app n'est pas prête »** : publiez l'app dans Dify.
+- **« L'exécution a échoué dans Dify »** : un nœud a échoué (modèle injoignable, quota, erreur
   de code) ; ouvrez l'app et ses **Journaux** dans Dify.
 - **« Dify a mis trop de temps à répondre »** : augmentez l'attente maximale, ou simplifiez
   l'app.

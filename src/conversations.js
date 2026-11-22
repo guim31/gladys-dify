@@ -71,7 +71,13 @@ export class ConversationStore {
     }
   }
 
-  async save() {
+  /** Saves one after the other: two scenes at once must not mix their files. */
+  save() {
+    this.saving = (this.saving ?? Promise.resolve()).then(() => this.write());
+    return this.saving;
+  }
+
+  async write() {
     if (!this.file) {
       return;
     }

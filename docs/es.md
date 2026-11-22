@@ -115,11 +115,11 @@ rojo con su motivo.
 ## Solución de problemas
 
 - **«Dify no responde»**: compruebe la dirección y el puerto, y que Dify está iniciado.
-- **«clave de API rechazada»**: la app se ha eliminado o la clave revocado: cree una clave
+- **«Clave de API rechazada»**: la app se ha eliminado o se ha revocado la clave: cree una clave
   nueva.
 - **«Falta una entrada obligatoria»**: el workflow pide esa entrada; añádala en **Entradas**.
-- **«la app no está lista»**: publique la app en Dify.
-- **«la ejecución ha fallado en Dify»**: un nodo ha fallado (modelo inaccesible, cuota, error de
+- **«La app no está lista»**: publique la app en Dify.
+- **«La ejecución ha fallado en Dify»**: un nodo ha fallado (modelo inaccesible, cuota, error de
   código); abra la app y sus **Registros** en Dify.
 - **«Dify ha tardado demasiado»**: aumente la espera máxima o simplifique la app.
 - Problemas e ideas: [issues de GitHub](https://github.com/guim31/gladys-dify/issues).

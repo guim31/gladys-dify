@@ -21,6 +21,7 @@ import {
   typeInputs,
   workflowAnswer,
 } from '../src/hub.js';
+import { validateWidgetContent } from '@gladysassistant/integration-sdk';
 import { WIDGETS } from '../src/widgets.js';
 import {
   CHAT_KEY,
@@ -193,22 +194,24 @@ test('run a workflow: every failure is red, with "run failed" for a run that fai
     assert.match(ack.error.fr, expected);
     assert.deepEqual(Object.keys(ack.error).sort(), ['de', 'en', 'es', 'fr']);
   }
-  assert.equal(w.fake.sceneEvents.length, 0, 'a mistake in the scene is not a run');
+  // Only the missing input reached the app: a refused run.
+  assert.equal(w.fake.sceneEvents.length, 1);
+  assert.match(JSON.stringify(w.fake.sceneEvents[0]), /Entrée obligatoire manquante/);
 
   w.server.failing.add(WORKFLOW_KEY);
   const ack = await run({ inputs: 'room=kitchen' });
   assert.equal(ack.success, false);
-  assert.match(ack.error.fr, /l'exécution a échoué dans Dify \(Failed to execute code/);
-  const [event] = w.fake.sceneEvents;
+  assert.match(ack.error.fr, /L'exécution a échoué dans Dify \(Failed to execute code/);
+  const event = w.fake.sceneEvents.at(-1);
   assert.equal(eventKey(event), TRIGGERS.RUN_FAILED);
   assert.match(JSON.stringify(event), /"app":"Echo workflow"/);
-  assert.match(JSON.stringify(event), /l'exécution a échoué/);
+  assert.match(JSON.stringify(event), /L'exécution a échoué/);
   assert.equal(w.fake.lastState(featureId(w.gladys, WORKFLOW_KEY, FEATURE_KEYS.LAST_RUN)), 0);
 
   w.server.online = false;
   const down = await run({ inputs: 'room=kitchen' });
   assert.match(down.error.fr, /Dify ne répond pas/);
-  assert.equal(w.fake.sceneEvents.length, 2);
+  assert.equal(w.fake.sceneEvents.length, 3);
 });
 
 test('a run that takes too long: red, "run failed", and Dify asked to stop it', async (t) => {
@@ -373,6 +376,10 @@ test('parsers: inputs, length, conversation, cut, workflow answer', () => {
   assert.deepEqual(parseInputs(''), {});
   assert.equal(parseInputs('[1]'), null);
   assert.equal(parseInputs('no equal sign'), null);
+  assert.deepEqual(parseInputs('summary=Line one\nline two; and more\nroom=x'), {
+    summary: 'Line one\nline two; and more',
+    room: 'x',
+  });
   assert.deepEqual(
     typeInputs({ t: '21,5', n: 'abc', s: '3' }, [
       { variable: 't', type: 'number' },
@@ -391,4 +398,49 @@ test('parsers: inputs, length, conversation, cut, workflow answer', () => {
   assert.equal(workflowAnswer({ text: 'a', n: 1 }), 'a');
   assert.equal(workflowAnswer({ n: 1 }), '{"n":1}');
   assert.equal(workflowAnswer(null), '');
+});
+
+test('a stream cut before the end of the run is a failure, not a partial answer', async (t) => {
+  const w = await world(t);
+  const original = w.server.fetch;
+  w.hub.apps.get([...w.hub.apps.keys()][1]).client.fetch = async (target, init) => {
+    if (target.endsWith('/v1/chat-messages')) {
+      return new Response('data: {"event":"message","answer":"Half an ans"}\n\n', {
+        headers: { 'content-type': 'text/event-stream' },
+      });
+    }
+    return original(target, init);
+  };
+  const ack = await w.fake.sceneAction('send_message', { message: 'Hi' });
+  assert.equal(ack.success, false);
+  assert.equal(eventKey(w.fake.sceneEvents[0]), TRIGGERS.RUN_FAILED);
+  assert.equal(w.fake.lastState(featureId(w.gladys, CHAT_KEY, FEATURE_KEYS.LAST_RUN)), 0);
+});
+
+test('a workflow that partially succeeded (a node with an error strategy) is a success', async (t) => {
+  const w = await world(t);
+  const original = w.server.fetch;
+  w.hub.apps.get([...w.hub.apps.keys()][0]).client.fetch = async (target, init) => {
+    const response = await original(target, init);
+    if (!target.endsWith('/v1/workflows/run')) {
+      return response;
+    }
+    const text = (await response.text())
+      .replace('"status": "succeeded"', '"status": "partial-succeeded"')
+      .replace('"status":"succeeded","outputs"', '"status":"partial-succeeded","outputs"');
+    assert.match(text, /partial-succeeded/);
+    return new Response(text, { headers: { 'content-type': 'text/event-stream' } });
+  };
+  const ack = await w.fake.sceneAction('run_workflow', { inputs: 'room=x' });
+  assert.equal(ack.success, true, JSON.stringify(ack.error));
+});
+
+test('the widget keeps within the 10 rows of the core with 10 apps', async (t) => {
+  const server = new FakeDify();
+  const keys = Array.from({ length: 10 }, (_, i) => `app-many${String(i).padStart(20, '0')}`);
+  keys.forEach((key, i) => server.addApp(key, `App ${i}`, 'chat'));
+  const w = await world(t, { server, config: { url: '192.0.2.30', api_keys: keys.join(' ') } });
+  const content = await WIDGETS[WIDGET_KEY].get(w.hub, { language: 'en', settings: {} });
+  assert.equal(content.components[0].items.length, 10);
+  assert.deepEqual(validateWidgetContent(content), []);
 });

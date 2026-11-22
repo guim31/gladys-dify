@@ -400,16 +400,28 @@ export class DifyClient {
       const type = response.headers.get('content-type') ?? '';
       if (!type.includes('text/event-stream')) {
         // A server that ignored `streaming` (a proxy, an old version): one object.
-        const data = JSON.parse((await response.text()) || 'null');
-        foldEvents(
-          [
-            { event: 'message_end', ...data },
-            data.data
-              ? { event: 'workflow_finished', data: data.data }
-              : { event: 'message', answer: data.answer },
-          ],
-          result,
-        );
+        let data;
+        try {
+          data = JSON.parse(await response.text());
+        } catch {
+          data = null;
+        }
+        if (!data || typeof data !== 'object') {
+          throw new DifyError(ERROR_KINDS.NOT_DIFY, `POST ${path}: not a Dify answer`);
+        }
+        const events = [];
+        if (typeof data.answer === 'string') {
+          events.push({ event: 'message', answer: data.answer, task_id: data.task_id });
+        }
+        if (typeof data.conversation_id === 'string') {
+          events.push({ event: 'ping', conversation_id: data.conversation_id });
+        }
+        if (data.data && typeof data.data === 'object') {
+          events.push({ event: 'workflow_finished', data: data.data });
+        } else {
+          events.push({ event: 'message_end', metadata: data.metadata });
+        }
+        foldEvents(events, result);
         return result;
       }
       const decoder = new TextDecoder();
@@ -421,6 +433,16 @@ export class DifyClient {
         foldEvents(events, result);
       }
       foldEvents(parseSse(`${buffer}\n\n`).events, result);
+      // A stream cut before the end of the run (Dify restarted, a proxy
+      // closed it): the answer may be partial, not a success.
+      if (!result.finished && !result.failure) {
+        const cut = new DifyError(
+          ERROR_KINDS.RUN_FAILED,
+          `POST ${path}: stream ended before the run`,
+        );
+        cut.taskId = result.taskId;
+        throw cut;
+      }
       return result;
     } catch (err) {
       if (err instanceof DifyError) {

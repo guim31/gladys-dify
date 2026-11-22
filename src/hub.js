@@ -126,7 +126,9 @@ export function parseInputs(raw) {
     }
   }
   const inputs = {};
-  for (const part of text.split(/\r?\n|;/)) {
+  // A new pair starts only at `name=` (or `name:`): a value may hold a line
+  // break or a `;` (an answer of a previous action inserted with {{…}}).
+  for (const part of text.split(/(?:\r?\n|;)(?=\s*[A-Za-z_][\w-]*\s*[=:])/)) {
     if (!part.trim()) {
       continue;
     }
@@ -628,8 +630,11 @@ export class DifyHub {
 
   /** An error of the client, as the user reads it (Dify's own reason appended). */
   userError(err) {
-    if (!err.kind) {
+    if (err instanceof ActionFailure) {
       return err;
+    }
+    if (!err.kind) {
+      return new ActionFailure(ERROR_TEXT[ERROR_KINDS.HTTP], { cause: err });
     }
     const reason = err.kind === ERROR_KINDS.RUN_FAILED || err.kind === ERROR_KINDS.INVALID_INPUT;
     const detail = reason ? err.detail : null;
@@ -678,7 +683,8 @@ export class DifyHub {
       }
       return named[0];
     }
-    const fitting = apps.filter((app) => fits(app.info.mode));
+    // An app whose key is refused cannot run: the other one is meant.
+    const fitting = apps.filter((app) => fits(app.info.mode) && !app.error);
     if (fitting.length === 1) {
       return fitting[0];
     }
@@ -753,30 +759,35 @@ export class DifyHub {
           !(mode === APP_MODES.COMPLETION && field.variable === 'query'),
       );
       if (missing) {
-        throw new ActionFailure(
+        // A refused input is a failed run: recorded, and "run failed" fired.
+        const failure = new ActionFailure(
           everyLanguage((language) =>
             labelled(pick(ACTION_TEXT.missingInput, language), missing.variable, language),
           ),
         );
+        failure.record = true;
+        throw failure;
       }
-      const timeoutMs = Math.max(
-        this.timings.minRunMs,
-        Math.min(this.config.timeoutMs, ACTION_BUDGET_MS - (this.now() - asked)),
-      );
+      // What is left of the time Gladys grants the action (a retry included).
+      const timeoutMs = () =>
+        Math.max(
+          this.timings.minRunMs,
+          Math.min(this.config.timeoutMs, ACTION_BUDGET_MS - (this.now() - asked)),
+        );
       const runOnce = (conversationId) =>
         app.client.run({
           mode,
           inputs: typeInputs(inputs, form),
           query: message,
           conversationId,
-          timeoutMs,
+          timeoutMs: timeoutMs(),
         });
       const conversationId = name ? this.conversations.get(app.id, name) : undefined;
       try {
         result = await runOnce(conversationId);
       } catch (err) {
         // A conversation deleted in Dify: start a new one under the same name.
-        if (conversationId && err.status === 404) {
+        if (conversationId && err.status === 404 && err.code === 'not_found') {
           logger.info(`Dify app ${label}: conversation gone, a new one is started`);
           await this.conversations.delete(app.id, name);
           result = await runOnce(undefined);
@@ -790,7 +801,7 @@ export class DifyHub {
       // A workflow ends on its status; a chatflow too (an error node, a stop).
       if (
         (mode === APP_MODES.WORKFLOW || result.status !== null) &&
-        result.status !== 'succeeded'
+        !['succeeded', 'partial-succeeded'].includes(result.status)
       ) {
         const failure = new Error(`workflow ${result.status ?? 'ended without status'}`);
         failure.kind = ERROR_KINDS.RUN_FAILED;
@@ -798,7 +809,7 @@ export class DifyHub {
         throw failure;
       }
     } catch (err) {
-      if (err instanceof ActionFailure) {
+      if (err instanceof ActionFailure && !err.record) {
         throw err;
       }
       if (err.kind === ERROR_KINDS.TIMEOUT && err.taskId) {
@@ -819,7 +830,7 @@ export class DifyHub {
       await this.recordRun(app, {
         ok: false,
         duration: round1((this.now() - started) / 1000),
-        tokens: null,
+        tokens: 0,
         reason: pick(failure.message, this.config.language),
       });
       throw failure;
@@ -851,7 +862,9 @@ export class DifyHub {
       truncated,
     };
     if (kind === 'workflow') {
-      outputs.outputs = truncate(JSON.stringify(result.outputs ?? {}), MAX_ANSWER_CHARACTERS).text;
+      // Cut JSON is no JSON: too long, the outputs stay in Dify (the answer holds the start).
+      const all = JSON.stringify(result.outputs ?? {});
+      outputs.outputs = all.length <= MAX_ANSWER_CHARACTERS ? all : '{}';
     } else {
       outputs.conversation_id = result.conversationId ?? '';
     }

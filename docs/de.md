@@ -119,8 +119,8 @@ Zeitüberschreitung) erscheint rot mit seinem Grund.
   einen neuen Schlüssel.
 - **„Pflichteingabe fehlt"**: Der Workflow verlangt diese Eingabe; füge sie in **Eingaben**
   hinzu.
-- **„die App ist nicht bereit"**: Veröffentliche die App in Dify.
-- **„die Ausführung ist in Dify fehlgeschlagen"**: Ein Knoten ist fehlgeschlagen (Modell nicht
+- **„Die App ist nicht bereit"**: Veröffentliche die App in Dify.
+- **„Die Ausführung ist in Dify fehlgeschlagen"**: Ein Knoten ist fehlgeschlagen (Modell nicht
   erreichbar, Kontingent, Codefehler); öffne die App und ihre **Protokolle** in Dify.
 - **„Dify hat zu lange gebraucht"**: Erhöhe die längste Wartezeit oder vereinfache die App.
 - Probleme und Ideen: [GitHub-Issues](https://github.com/guim31/gladys-dify/issues).

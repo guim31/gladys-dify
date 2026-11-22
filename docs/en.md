@@ -109,8 +109,8 @@ missing input, run in error, timeout) shows in red with its reason.
 - **"Dify does not answer"**: check the address and the port, and that Dify is started.
 - **"API key refused"**: the app was deleted, or the key revoked: create a new key.
 - **"Required input missing"**: the workflow asks for this input; add it in **Inputs**.
-- **"the app is not ready"**: publish the app in Dify.
-- **"the run failed in Dify"**: a node failed (model unreachable, quota, code error); open the
+- **"The app is not ready"**: publish the app in Dify.
+- **"The run failed in Dify"**: a node failed (model unreachable, quota, code error); open the
   app and its **Logs** in Dify.
 - **"Dify took too long to answer"**: raise the longest wait, or simplify the app.
 - Problems and ideas: [GitHub issues](https://github.com/guim31/gladys-dify/issues).
