@@ -1,45 +1,107 @@
 // -----------------------------------------------------------------------------
-// Integration configuration.
-//
-// The configuration is filled in by the user in Gladys, from the `config_schema`
-// declared in `gladys-assistant-integration.json`. The SDK fetches it for you
-// (`gladys.getConfig()`) and notifies you of every change through
-// `gladys.onConfigUpdated()`.
-//
-// This module only provides defaults and normalizes the received object, so the
-// rest of the code never has to deal with `undefined`.
+// Integration configuration: defaults (they mirror the `default` values of the
+// manifest `config_schema`, see test/manifest.test.js) and normalization, so
+// the rest of the code never deals with strings, blanks or `undefined`.
 // -----------------------------------------------------------------------------
 
-// Defaults: they MUST stay consistent with the `default` values declared in the
-// `config_schema` of the manifest.
+export const LANGUAGES = ['en', 'fr', 'de', 'es'];
+
+// Refresh intervals offered in the configuration, in seconds.
+export const POLL_INTERVALS = ['30', '60', '120', '300'];
+
+// Longest wait for an answer, in seconds. A scene action is granted 120 s
+// by Gladys (connection wait included): the longest choice leaves a margin.
+export const TIMEOUTS = ['30', '60', '90', '110'];
+
 export const DEFAULT_CONFIG = {
-  latitude: 48.8566, // Paris
-  longitude: 2.3522,
-  unit: 'celsius', // 'celsius' | 'fahrenheit'
-  // Seconds between two reads of the polled sensors. Gladys polls at most once
-  // a minute: slower intervals are applied by skipping polls (see
-  // createPoller in src/devices/index.js).
-  poll_frequency: 300,
-  // Reserved key (NOT in config_schema): because the manifest declares both
-  // 'local' and 'cloud' in its `transports` field, Gladys shows a standard
-  // "Prefer the local connection" toggle and sends the user's choice here.
-  // Read-only for the integration; defaults to true.
-  GLADYS_PREFER_LOCAL: true,
+  url: '',
+  api_keys: '',
+  timeout: '60',
+  poll_interval: '60',
+  language: 'fr',
 };
 
+// Pages of the Dify interface and API roots: a URL copied from the browser
+// points at one of them, the instance lives at the root.
+const INTERFACE_PATH =
+  /\/(v1|console\/api|api|apps|app|chat|chatbot|workflow|completion|datasets|explore|tools|plugins|signin|install)(\/.*)?$/i;
+
+// Dify app API keys ("app-" and 24 characters); other shapes are accepted, a
+// self-hosted fork may differ, but never blanks or separators.
+const KEY_SEPARATORS = /[\s,;]+/;
+export const MAX_APPS = 10;
+
 /**
- * Merge the user config with the defaults.
- * @param {Record<string, unknown>} raw config returned by the SDK
+ * The API keys typed by the user (one per Dify app), separated by spaces,
+ * commas, semicolons or new lines; duplicates dropped.
+ * @param {unknown} raw
+ * @returns {string[]}
+ */
+export function parseApiKeys(raw) {
+  if (typeof raw !== 'string') {
+    return [];
+  }
+  const keys = raw
+    .split(KEY_SEPARATORS)
+    .map((key) => key.trim())
+    .filter(Boolean);
+  return [...new Set(keys)].slice(0, MAX_APPS);
+}
+
+/**
+ * Parse the address typed by the user into a base URL: a bare host or IP
+ * (`192.0.2.10`, port 80), `host:port`, or a URL copied from the
+ * browser (`https://dify.example.org/apps`, the page dropped, a
+ * reverse proxy path kept).
+ * @param {unknown} raw
+ * @returns {string|null} base URL without trailing slash, null when unusable
+ */
+export function parseServerUrl(raw) {
+  if (typeof raw !== 'string') {
+    return null;
+  }
+  const text = raw.trim();
+  if (!text) {
+    return null;
+  }
+  const typedScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text);
+  let url;
+  try {
+    url = new URL(typedScheme ? text : `http://${text}`);
+  } catch {
+    return null;
+  }
+  if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) {
+    return null;
+  }
+  // Credentials in the address would end up in the logs.
+  if (url.username || url.password) {
+    return null;
+  }
+  const path = url.pathname.replace(/\/+$/, '').replace(INTERFACE_PATH, '').replace(/\/+$/, '');
+  return `${url.origin}${path}`;
+}
+
+/** Host part shown to the user (no scheme). */
+export const hostOf = (url) => url.replace(/^https?:\/\//, '');
+
+/**
+ * @param {Record<string, unknown>} raw the configuration returned by the SDK
  */
 export function normalizeConfig(raw = {}) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const text = (key) => (typeof source[key] === 'string' ? source[key].trim() : '');
+  const pick = (key, list) => {
+    const value = source[key] === undefined || source[key] === null ? '' : String(source[key]);
+    return list.includes(value) ? value : DEFAULT_CONFIG[key];
+  };
+  const typed = text('url');
   return {
-    ...DEFAULT_CONFIG,
-    ...raw,
-    // Force the types: config may arrive as strings from a form.
-    latitude: Number(raw.latitude ?? DEFAULT_CONFIG.latitude),
-    longitude: Number(raw.longitude ?? DEFAULT_CONFIG.longitude),
-    poll_frequency: Number(raw.poll_frequency ?? DEFAULT_CONFIG.poll_frequency),
-    // The preference is a boolean; anything but an explicit false means true.
-    GLADYS_PREFER_LOCAL: raw.GLADYS_PREFER_LOCAL !== false,
+    url: parseServerUrl(typed),
+    urlTyped: typed !== '',
+    apiKeys: parseApiKeys(source.api_keys),
+    timeoutMs: Number(pick('timeout', TIMEOUTS)) * 1000,
+    pollIntervalMs: Number(pick('poll_interval', POLL_INTERVALS)) * 1000,
+    language: LANGUAGES.includes(source.language) ? source.language : DEFAULT_CONFIG.language,
   };
 }

@@ -1,0 +1,9 @@
+{
+  "status": 404,
+  "content_type": "application/json",
+  "body": {
+    "code": "not_found",
+    "message": "Conversation Not Exists.",
+    "status": 404
+  }
+}

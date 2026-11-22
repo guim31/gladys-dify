@@ -1,177 +1,696 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Dify",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Run your Dify workflows, chat apps and agents from a scene, and follow their state.",
+    "fr": "Lancez vos workflows, apps de chat et agents Dify depuis une scène et suivez leur état.",
+    "de": "Starte deine Dify-Workflows, Chat-Apps und Agenten aus einer Szene und behalte sie im Blick.",
+    "es": "Ejecute sus workflows, apps de chat y agentes de Dify desde una escena y siga su estado."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-dify:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-dify/main/cover.png",
+  "categories": ["assistants", "services"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your Dify server",
+        "fr": "Votre serveur Dify",
+        "de": "Dein Dify-Server",
+        "es": "Su servidor Dify"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Self-hosted Dify (port 80) or Dify Cloud (https://api.dify.ai). Each app has its own API key: open the app, then API Access, API Key.",
+        "fr": "Dify auto-hébergé (port 80) ou Dify Cloud (https://api.dify.ai). Chaque app a sa propre clé d'API : ouvrez l'app, puis Accès API, Clé API.",
+        "de": "Selbst gehostetes Dify (Port 80) oder Dify Cloud (https://api.dify.ai). Jede App hat ihren eigenen API-Schlüssel: Öffne die App, dann API-Zugriff, API-Schlüssel.",
+        "es": "Dify autoalojado (puerto 80) o Dify Cloud (https://api.dify.ai). Cada app tiene su propia clave de API: abra la app y luego Acceso API, Clave API."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://docs.dify.ai/en/guides/application-publishing/developing-with-apis",
+          "label": {
+            "en": "Dify Service API",
+            "fr": "Service API de Dify",
+            "de": "Service-API von Dify",
+            "es": "Service API de Dify"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "url",
+      "type": "string",
+      "label": {
+        "en": "Address",
+        "fr": "Adresse",
+        "de": "Adresse",
+        "es": "Dirección"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
+      "description": {
+        "en": "Address of Dify (the one of its web interface), or https://api.dify.ai for Dify Cloud.",
+        "fr": "Adresse de Dify (celle de son interface web), ou https://api.dify.ai pour Dify Cloud.",
+        "de": "Adresse von Dify (die seiner Weboberfläche) oder https://api.dify.ai für Dify Cloud.",
+        "es": "Dirección de Dify (la de su interfaz web), o https://api.dify.ai para Dify Cloud."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.20",
+        "fr": "ex. 192.168.1.20",
+        "de": "z. B. 192.168.1.20",
+        "es": "p. ej. 192.168.1.20"
+      },
       "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "default": ""
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "api_keys",
+      "type": "secret",
+      "label": {
+        "en": "API keys of the apps",
+        "fr": "Clés d'API des apps",
+        "de": "API-Schlüssel der Apps",
+        "es": "Claves de API de las apps"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "description": {
+        "en": "One key per app (app-…), separated by spaces or commas, 10 at most. Each app becomes a device.",
+        "fr": "Une clé par app (app-…), séparées par des espaces ou des virgules, 10 au plus. Chaque app devient un appareil.",
+        "de": "Ein Schlüssel pro App (app-…), getrennt durch Leerzeichen oder Kommas, höchstens 10. Jede App wird ein Gerät.",
+        "es": "Una clave por app (app-…), separadas por espacios o comas, 10 como máximo. Cada app se convierte en un dispositivo."
+      },
+      "required": true
     },
     {
-      "key": "unit",
+      "key": "timeout",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Longest wait for an answer",
+        "fr": "Attente maximale d'une réponse",
+        "de": "Längste Wartezeit auf eine Antwort",
+        "es": "Espera máxima de una respuesta"
+      },
+      "description": {
+        "en": "A workflow or an agent that calls a large model or several tools can take a minute or more.",
+        "fr": "Un workflow ou un agent qui appelle un gros modèle ou plusieurs outils peut mettre une minute ou plus.",
+        "de": "Ein Workflow oder Agent, der ein großes Modell oder mehrere Tools aufruft, kann eine Minute oder länger brauchen.",
+        "es": "Un workflow o un agente que llama a un modelo grande o a varias herramientas puede tardar un minuto o más."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "60",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "30",
+          "label": {
+            "en": "30 seconds",
+            "fr": "30 secondes",
+            "de": "30 Sekunden",
+            "es": "30 segundos"
+          }
+        },
+        {
+          "value": "60",
+          "label": {
+            "en": "60 seconds",
+            "fr": "60 secondes",
+            "de": "60 Sekunden",
+            "es": "60 segundos"
+          }
+        },
+        {
+          "value": "90",
+          "label": {
+            "en": "90 seconds",
+            "fr": "90 secondes",
+            "de": "90 Sekunden",
+            "es": "90 segundos"
+          }
+        },
+        {
+          "value": "110",
+          "label": {
+            "en": "110 seconds",
+            "fr": "110 secondes",
+            "de": "110 Sekunden",
+            "es": "110 segundos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "How often the apps are checked (one light request per app).",
+        "fr": "Fréquence de vérification des apps (une requête légère par app).",
+        "de": "Wie oft die Apps geprüft werden (eine leichte Anfrage pro App).",
+        "es": "Con qué frecuencia se comprueban las apps (una solicitud ligera por app)."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "60",
+      "options": [
+        {
+          "value": "30",
+          "label": {
+            "en": "30 seconds",
+            "fr": "30 secondes",
+            "de": "30 Sekunden",
+            "es": "30 segundos"
+          }
+        },
+        {
+          "value": "60",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
+        },
+        {
+          "value": "120",
+          "label": {
+            "en": "2 minutes",
+            "fr": "2 minutes",
+            "de": "2 Minuten",
+            "es": "2 minutos"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "5 minutes",
+            "fr": "5 minutes",
+            "de": "5 Minuten",
+            "es": "5 minutos"
+          }
+        }
+      ]
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the feature names",
+        "fr": "Langue des noms de fonctionnalités",
+        "de": "Sprache der Funktionsnamen",
+        "es": "Idioma de los nombres de funciones"
+      },
+      "description": {
+        "en": "Names given to the features when the device is added, and texts of the scene events and errors.",
+        "fr": "Noms donnés aux fonctionnalités à l'ajout de l'appareil, et textes des événements de scène et des erreurs.",
+        "de": "Namen der Funktionen beim Hinzufügen des Geräts und Texte der Szenen-Ereignisse und Fehler.",
+        "es": "Nombres de las funciones al añadir el dispositivo y textos de los eventos de escena y de los errores."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
       "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
-      "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+      "key": "run_failed",
+      "label": {
+        "en": "A Dify run failed",
+        "fr": "Une exécution Dify a échoué",
+        "de": "Eine Dify-Ausführung ist fehlgeschlagen",
+        "es": "Una ejecución de Dify ha fallado"
       },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
-        }
-      ],
+      "description": {
+        "en": "A run started by a scene failed: node error, timeout, refused inputs, Dify unreachable.",
+        "fr": "Une exécution lancée par une scène a échoué : erreur d'un nœud, délai dépassé, entrées refusées, Dify injoignable.",
+        "de": "Eine von einer Szene gestartete Ausführung ist fehlgeschlagen: Knotenfehler, Zeitüberschreitung, abgelehnte Eingaben, Dify nicht erreichbar.",
+        "es": "Una ejecución iniciada por una escena ha fallado: error de un nodo, tiempo agotado, entradas rechazadas, Dify inaccesible."
+      },
       "variables": [
         {
-          "key": "target",
+          "key": "app",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "App",
+            "fr": "App",
+            "de": "App",
+            "es": "App"
+          }
+        },
+        {
+          "key": "error",
+          "type": "string",
+          "label": {
+            "en": "Reason",
+            "fr": "Raison",
+            "de": "Grund",
+            "es": "Motivo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "server_offline",
+      "label": {
+        "en": "Dify is offline",
+        "fr": "Dify est hors ligne",
+        "de": "Dify ist offline",
+        "es": "Dify está fuera de línea"
+      },
+      "description": {
+        "en": "The server stops answering (two failed readings in a row): the runs of your scenes will fail.",
+        "fr": "Le serveur ne répond plus (deux lectures en échec de suite) : les exécutions de vos scènes échoueront.",
+        "de": "Der Server antwortet nicht mehr (zwei fehlgeschlagene Abfragen in Folge): Die Ausführungen deiner Szenen schlagen fehl.",
+        "es": "El servidor deja de responder (dos lecturas fallidas seguidas): las ejecuciones de sus escenas fallarán."
+      },
+      "variables": [
+        {
+          "key": "error",
+          "type": "string",
+          "label": {
+            "en": "Reason",
+            "fr": "Raison",
+            "de": "Grund",
+            "es": "Motivo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "server_back",
+      "label": {
+        "en": "Dify is back online",
+        "fr": "Dify est de retour",
+        "de": "Dify ist wieder online",
+        "es": "Dify vuelve a estar en línea"
+      },
+      "description": {
+        "en": "The server answers again after being offline, with the length of the outage.",
+        "fr": "Le serveur répond de nouveau après avoir été hors ligne, avec la durée de la panne.",
+        "de": "Der Server antwortet wieder, nachdem er offline war, mit der Dauer des Ausfalls.",
+        "es": "El servidor responde de nuevo tras estar fuera de línea, con la duración de la caída."
+      },
+      "variables": [
+        {
+          "key": "downtime_minutes",
+          "type": "number",
+          "label": {
+            "en": "Outage length (minutes)",
+            "fr": "Durée de la panne (minutes)",
+            "de": "Dauer des Ausfalls (Minuten)",
+            "es": "Duración de la caída (minutos)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "run_workflow",
+      "label": {
+        "en": "Run a Dify workflow",
+        "fr": "Lancer un workflow Dify",
+        "de": "Dify-Workflow starten",
+        "es": "Ejecutar un workflow de Dify"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Runs a Dify workflow with its inputs and hands its outputs to the next actions (message, speech, condition).",
+        "fr": "Lance un workflow Dify avec ses entrées et passe ses sorties aux actions suivantes (message, voix, condition).",
+        "de": "Startet einen Dify-Workflow mit seinen Eingaben und gibt seine Ausgaben an die nächsten Aktionen weiter (Nachricht, Sprache, Bedingung).",
+        "es": "Ejecuta un workflow de Dify con sus entradas y pasa sus salidas a las acciones siguientes (mensaje, voz, condición)."
+      },
+      "timeout_seconds": 120,
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "key": "app",
+          "type": "string",
+          "label": {
+            "en": "App (empty: the only one)",
+            "fr": "App (vide : la seule)",
+            "de": "App (leer: die einzige)",
+            "es": "App (vacío: la única)"
+          },
+          "description": {
+            "en": "Name of the workflow in Gladys or in Dify. Empty when only one configured app can run it.",
+            "fr": "Nom du workflow dans Gladys ou dans Dify. Vide quand une seule app configurée peut le faire.",
+            "de": "Name des Workflows in Gladys oder in Dify. Leer, wenn nur eine konfigurierte App es kann.",
+            "es": "Nombre del workflow en Gladys o en Dify. Vacío cuando solo una app configurada puede hacerlo."
+          },
+          "required": false
+        },
+        {
+          "key": "inputs",
+          "type": "string",
+          "label": {
+            "en": "Inputs",
+            "fr": "Entrées",
+            "de": "Eingaben",
+            "es": "Entradas"
+          },
+          "description": {
+            "en": "One name=value per line or separated by ; (e.g. room=kitchen; temperature=21), or a JSON object. Type '{{' for scene information.",
+            "fr": "Un nom=valeur par ligne ou séparés par ; (ex. piece=cuisine; temperature=21), ou un objet JSON. Tapez « {{ » pour les informations de la scène.",
+            "de": "Ein name=wert pro Zeile oder durch ; getrennt (z. B. raum=küche; temperatur=21) oder ein JSON-Objekt. Tippe „{{“ für Infos der Szene.",
+            "es": "Un nombre=valor por línea o separados por ; (p. ej. sala=cocina; temperatura=21), o un objeto JSON. Escriba «{{» para datos de la escena."
+          },
+          "required": false
+        },
+        {
+          "key": "max_characters",
+          "type": "number",
+          "label": {
+            "en": "Longest answer (characters)",
+            "fr": "Réponse la plus longue (caractères)",
+            "de": "Längste Antwort (Zeichen)",
+            "es": "Respuesta más larga (caracteres)"
+          },
+          "description": {
+            "en": "A longer answer is cut cleanly. A text message holds about 1000 characters well.",
+            "fr": "Une réponse plus longue est coupée proprement. Un message tient bien 1000 caractères environ.",
+            "de": "Eine längere Antwort wird sauber gekürzt. Eine Nachricht fasst gut etwa 1000 Zeichen.",
+            "es": "Una respuesta más larga se corta limpiamente. Un mensaje admite bien unos 1000 caracteres."
+          },
+          "required": false,
+          "default": 1000,
+          "min": 50,
+          "max": 10000
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
+          "key": "response",
+          "type": "string",
+          "label": {
+            "en": "Answer",
+            "fr": "Réponse",
+            "de": "Antwort",
+            "es": "Respuesta"
+          }
+        },
+        {
+          "key": "outputs",
+          "type": "string",
+          "label": {
+            "en": "All outputs (JSON)",
+            "fr": "Toutes les sorties (JSON)",
+            "de": "Alle Ausgaben (JSON)",
+            "es": "Todas las salidas (JSON)"
+          }
+        },
+        {
+          "key": "app",
+          "type": "string",
+          "label": {
+            "en": "App used",
+            "fr": "App utilisée",
+            "de": "Verwendete App",
+            "es": "App usada"
+          }
+        },
+        {
+          "key": "duration_seconds",
+          "type": "number",
+          "label": {
+            "en": "Run time (seconds)",
+            "fr": "Durée d'exécution (secondes)",
+            "de": "Laufzeit (Sekunden)",
+            "es": "Tiempo de ejecución (segundos)"
+          }
+        },
+        {
+          "key": "tokens",
+          "type": "number",
+          "label": {
+            "en": "Tokens used",
+            "fr": "Tokens utilisés",
+            "de": "Verbrauchte Tokens",
+            "es": "Tokens usados"
+          }
+        },
+        {
+          "key": "truncated",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "Answer cut",
+            "fr": "Réponse coupée",
+            "de": "Antwort gekürzt",
+            "es": "Respuesta cortada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "send_message",
+      "label": {
+        "en": "Send a message to Dify",
+        "fr": "Envoyer un message à Dify",
+        "de": "Nachricht an Dify senden",
+        "es": "Enviar un mensaje a Dify"
+      },
+      "description": {
+        "en": "Sends a message to a Dify chatflow, chat app, agent or text generator and hands its answer to the next actions.",
+        "fr": "Envoie un message à un chatflow, une app de chat, un agent ou un générateur de texte Dify et passe sa réponse aux actions suivantes.",
+        "de": "Schickt eine Nachricht an einen Dify-Chatflow, eine Chat-App, einen Agenten oder Textgenerator und gibt die Antwort an die nächsten Aktionen weiter.",
+        "es": "Envía un mensaje a un chatflow, app de chat, agente o generador de texto de Dify y pasa su respuesta a las acciones siguientes."
+      },
+      "timeout_seconds": 120,
+      "fields": [
+        {
+          "key": "message",
+          "type": "string",
+          "label": {
+            "en": "Message",
+            "fr": "Message",
+            "de": "Nachricht",
+            "es": "Mensaje"
+          },
+          "description": {
+            "en": "Type '{{' to insert scene information: a temperature, a trigger value…",
+            "fr": "Tapez « {{ » pour insérer des informations de la scène : une température, une valeur du déclencheur…",
+            "de": "Tippe „{{“, um Informationen der Szene einzufügen: eine Temperatur, einen Wert des Auslösers…",
+            "es": "Escriba «{{» para insertar información de la escena: una temperatura, un valor del desencadenante…"
+          },
+          "required": true
+        },
+        {
+          "key": "app",
+          "type": "string",
+          "label": {
+            "en": "App (empty: the only one)",
+            "fr": "App (vide : la seule)",
+            "de": "App (leer: die einzige)",
+            "es": "App (vacío: la única)"
+          },
+          "description": {
+            "en": "Name of the app in Gladys or in Dify. Empty when only one configured app can run it.",
+            "fr": "Nom de l'app dans Gladys ou dans Dify. Vide quand une seule app configurée peut le faire.",
+            "de": "Name der App in Gladys oder in Dify. Leer, wenn nur eine konfigurierte App es kann.",
+            "es": "Nombre de la app en Gladys o en Dify. Vacío cuando solo una app configurada puede hacerlo."
+          },
+          "required": false
+        },
+        {
+          "key": "conversation",
+          "type": "string",
+          "label": {
+            "en": "Conversation (optional)",
+            "fr": "Conversation (facultative)",
+            "de": "Unterhaltung (optional)",
+            "es": "Conversación (opcional)"
+          },
+          "description": {
+            "en": "The same name from one run to the next continues the conversation (e.g. kitchen). Empty: a new conversation each time.",
+            "fr": "Le même nom d'une exécution à l'autre poursuit la conversation (ex. cuisine). Vide : une nouvelle conversation à chaque fois.",
+            "de": "Derselbe Name von einer Ausführung zur nächsten setzt die Unterhaltung fort (z. B. küche). Leer: jedes Mal eine neue Unterhaltung.",
+            "es": "El mismo nombre de una ejecución a otra continúa la conversación (p. ej. cocina). Vacío: una conversación nueva cada vez."
+          },
+          "required": false
+        },
+        {
+          "key": "inputs",
+          "type": "string",
+          "label": {
+            "en": "Inputs",
+            "fr": "Entrées",
+            "de": "Eingaben",
+            "es": "Entradas"
+          },
+          "description": {
+            "en": "One name=value per line or separated by ; (e.g. room=kitchen; temperature=21), or a JSON object. Type '{{' for scene information.",
+            "fr": "Un nom=valeur par ligne ou séparés par ; (ex. piece=cuisine; temperature=21), ou un objet JSON. Tapez « {{ » pour les informations de la scène.",
+            "de": "Ein name=wert pro Zeile oder durch ; getrennt (z. B. raum=küche; temperatur=21) oder ein JSON-Objekt. Tippe „{{“ für Infos der Szene.",
+            "es": "Un nombre=valor por línea o separados por ; (p. ej. sala=cocina; temperatura=21), o un objeto JSON. Escriba «{{» para datos de la escena."
+          },
+          "required": false
+        },
+        {
+          "key": "max_characters",
+          "type": "number",
+          "label": {
+            "en": "Longest answer (characters)",
+            "fr": "Réponse la plus longue (caractères)",
+            "de": "Längste Antwort (Zeichen)",
+            "es": "Respuesta más larga (caracteres)"
+          },
+          "description": {
+            "en": "A longer answer is cut cleanly. A text message holds about 1000 characters well.",
+            "fr": "Une réponse plus longue est coupée proprement. Un message tient bien 1000 caractères environ.",
+            "de": "Eine längere Antwort wird sauber gekürzt. Eine Nachricht fasst gut etwa 1000 Zeichen.",
+            "es": "Una respuesta más larga se corta limpiamente. Un mensaje admite bien unos 1000 caracteres."
+          },
+          "required": false,
+          "default": 1000,
+          "min": 50,
+          "max": 10000
+        }
+      ],
+      "outputs": [
+        {
+          "key": "response",
+          "type": "string",
+          "label": {
+            "en": "Answer",
+            "fr": "Réponse",
+            "de": "Antwort",
+            "es": "Respuesta"
+          }
+        },
+        {
+          "key": "app",
+          "type": "string",
+          "label": {
+            "en": "App used",
+            "fr": "App utilisée",
+            "de": "Verwendete App",
+            "es": "App usada"
+          }
+        },
+        {
+          "key": "conversation_id",
+          "type": "string",
+          "label": {
+            "en": "Conversation id",
+            "fr": "Identifiant de conversation",
+            "de": "Unterhaltungs-ID",
+            "es": "Identificador de conversación"
+          }
+        },
+        {
+          "key": "duration_seconds",
+          "type": "number",
+          "label": {
+            "en": "Run time (seconds)",
+            "fr": "Durée d'exécution (secondes)",
+            "de": "Laufzeit (Sekunden)",
+            "es": "Tiempo de ejecución (segundos)"
+          }
+        },
+        {
+          "key": "tokens",
+          "type": "number",
+          "label": {
+            "en": "Tokens used",
+            "fr": "Tokens utilisés",
+            "de": "Verbrauchte Tokens",
+            "es": "Tokens usados"
+          }
+        },
+        {
+          "key": "truncated",
+          "type": "boolean",
+          "label": {
+            "en": "Answer cut",
+            "fr": "Réponse coupée",
+            "de": "Antwort gekürzt",
+            "es": "Respuesta cortada"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "dify",
+      "label": {
+        "en": "Dify",
+        "fr": "Dify",
+        "de": "Dify",
+        "es": "Dify"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "State of Dify, last run of each app and the latest answer a scene received.",
+        "fr": "État de Dify, dernière exécution de chaque app et dernière réponse reçue par une scène.",
+        "de": "Zustand von Dify, letzte Ausführung jeder App und die neueste Antwort einer Szene.",
+        "es": "Estado de Dify, última ejecución de cada app y la última respuesta recibida por una escena."
+      },
+      "icon": "cpu",
+      "settings": [
+        {
+          "key": "show_answer",
+          "type": "boolean",
+          "label": {
+            "en": "Show the last answer",
+            "fr": "Afficher la dernière réponse",
+            "de": "Letzte Antwort anzeigen",
+            "es": "Mostrar la última respuesta"
+          },
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ]
 }

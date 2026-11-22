@@ -1,0 +1,5 @@
+{
+  "status": 200,
+  "content_type": "text/event-stream; charset=utf-8",
+  "body": "event: ping\n\ndata: {\"event\":\"workflow_started\",\"task_id\":\"5549ea2e-2e4f-49f9-b784-b9fe35d2e928\",\"workflow_run_id\":\"5549ea2e-2e4f-49f9-b784-b9fe35d2e928\",\"data\":{\"id\":\"5549ea2e-2e4f-49f9-b784-b9fe35d2e928\",\"workflow_id\":\"ac849f72-e210-435d-87c0-9f96b75ea466\",\"inputs\":{},\"created_at\":1795347122,\"reason\":\"initial\"}}\n\ndata: {\"event\":\"workflow_finished\",\"task_id\":\"5549ea2e-2e4f-49f9-b784-b9fe35d2e928\",\"workflow_run_id\":\"5549ea2e-2e4f-49f9-b784-b9fe35d2e928\",\"data\":{\"id\":\"5549ea2e-2e4f-49f9-b784-b9fe35d2e928\",\"workflow_id\":\"ac849f72-e210-435d-87c0-9f96b75ea466\",\"status\":\"failed\",\"outputs\":null,\"error\":\"room is required in input form\",\"elapsed_time\":0.0,\"total_tokens\":0,\"total_steps\":0,\"created_by\":{},\"created_at\":1795347122,\"finished_at\":1795347122,\"exceptions_count\":1,\"files\":[]}}\n\n"
+}

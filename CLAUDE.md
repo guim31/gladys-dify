@@ -31,16 +31,20 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+index.js                          SDK wiring only (src/app.js does the work)
+src/app.js                        registers every handler on the SDK, returns the hub
+src/hub.js                        apps read on a timer, states, scene events, the runs
+src/dify/client.js                Dify Service API client (streaming runs, errors by kind)
+src/devices.js                    one device per app (id = hash of its key), features
+src/conversations.js              named conversations -> Dify ids, in /data
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/widgets.js                    dashboard widget handler (manifest `widgets`)
+src/texts.js                      every message in en/fr/de/es, ActionFailure
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (mandatory)
+test/                             node --test, against the SDK's fake Gladys and a fake Dify
+test/fixtures/dify/               answers recorded from a real Dify 1.20.0
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -259,3 +263,28 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Dify (notes propres à cette intégration, 22/11/2026)
+
+- **API « Service API »** (`/v1`), une clé par app (`app-…`) : la clé choisit l'app, et l'API ne
+  donne **aucun identifiant d'app** (`GET /v1/info` : `name`, `description`, `tags`, `mode`,
+  `author_name`). L'identifiant d'appareil est donc un SHA-256 tronqué de la clé : nouvelle clé =
+  nouvel appareil (documenté). Jamais la clé elle-même dans un identifiant ou un log.
+- **Toujours en `streaming`** : Dify refuse `blocking` pour les apps agent, et un proxy (Dify Cloud
+  derrière Cloudflare) coupe une requête bloquante à 100 s. Événements utiles : `message` /
+  `agent_message` (morceaux de réponse), `message_replace`, `message_end` (`metadata.usage`),
+  `workflow_finished` (`status`, `outputs`, `error`, `elapsed_time`, `total_tokens`), `error`.
+- Relevé sur Dify 1.20.0 : une **entrée obligatoire manquante n'est pas un 400** sur
+  `/v1/workflows/run` en streaming, mais un `workflow_finished` `failed` (« room is required in
+  input form ») ; d'où la vérification par `GET /v1/parameters` avant l'exécution. Un nombre
+  passé en chaîne (`"21"`) est accepté.
+- Mauvaise route : 400 `not_workflow_app` / `not_chat_app` ; clé invalide : 401 `unauthorized`, app
+  supprimée : 403 `forbidden` « The app no longer exists. » ; conversation inconnue : 404 `not_found` (l'intégration repart sur une
+  nouvelle conversation du même nom). `POST …/tasks/{id}/stop` répond 200 même pour une tâche
+  inconnue.
+- Les conversations appartiennent à un utilisateur Dify : tout est fait pour `user: "gladys"`.
+- Dify 1.20 en Docker sans le compose officiel : postgres, redis, `dify-api` en `MODE=api`
+  (migrations) et en `MODE=worker` suffisent pour un workflow sans modèle ; la console se pilote
+  par `/console/api/setup`, `/login` (cookies + `X-CSRF-Token`), `/apps/imports` (DSL YAML),
+  `/workflows/publish`, `/api-keys`. Un nœud Code sans sandbox échoue : pratique pour tester un
+  échec réel.

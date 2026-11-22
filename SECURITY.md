@@ -30,6 +30,17 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+The integration stores under `/data` only the Dify conversation ids of the
+conversations named in scenes (`conversations.json`), never a message. The
+address of Dify and the API keys of the apps live in the configuration of the
+integration, in Gladys; the keys are sent only to that Dify server, as Bearer
+tokens, and never written to the logs or the device ids (a hash is used), nor
+are the inputs, the messages and the answers. The integration only talks to
+the Dify server, on your network, behind your reverse proxy or Dify Cloud: use
+HTTPS when it is reached over the internet. An app key lets anyone run that
+app (and spend its model quota): keep it secret, revoke it in Dify if it
+leaks.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+Dify and the models and tools its apps call.
