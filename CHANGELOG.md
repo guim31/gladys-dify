@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-22
+
 ### Added
 
 - Scene action _Run a Dify workflow_: a workflow app run with inputs from the
@@ -29,3 +31,6 @@ the notes of the version's GitHub Release.
   answer.
 - _Test the connection_ lists the apps and their kind.
 - English, French, German and Spanish everywhere.
+
+[Unreleased]: https://github.com/guim31/gladys-dify/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-dify/releases/tag/v1.0.0
