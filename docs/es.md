@@ -128,7 +128,7 @@ rojo con su motivo.
 
 - Solo texto: ni imagen ni archivo en las entradas.
 - Gladys espera como máximo dos minutos una acción; la integración pide entonces a Dify que
-  detenga la ejecución. La respuesta está limitada a 10 000 caracteres.
+  detenga la ejecución. La respuesta está limitada a 10 000 caracteres; **Todas las salidas (JSON)** queda vacío por encima.
 - Cada ejecución se hace para el usuario de Dify `gladys`: sus escenas comparten las
   conversaciones.
 - Las cuotas y los precios son los de sus proveedores de modelos (y de su plan de Dify Cloud).

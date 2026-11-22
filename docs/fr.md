@@ -130,7 +130,7 @@ en rouge avec sa raison.
 
 - Texte seulement : ni image ni fichier dans les entrées.
 - Gladys attend deux minutes au plus une action ; l'intégration demande alors à Dify d'arrêter
-  l'exécution. La réponse est plafonnée à 10 000 caractères.
+  l'exécution. La réponse est plafonnée à 10 000 caractères ; **Toutes les sorties (JSON)** reste vide au-delà.
 - Chaque exécution est faite pour l'utilisateur Dify `gladys` : vos scènes partagent les
   conversations.
 - Les quotas et les prix sont ceux de vos fournisseurs de modèles (et de votre offre Dify

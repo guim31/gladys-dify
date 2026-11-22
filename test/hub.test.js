@@ -371,13 +371,13 @@ test('test the connection: green with the apps, red when Dify is down', async (t
 });
 
 test('parsers: inputs, length, conversation, cut, workflow answer', () => {
-  assert.deepEqual(parseInputs('a=1\nb: deux; c = x=y'), { a: '1', b: 'deux', c: 'x=y' });
+  assert.deepEqual(parseInputs('a=1\nb= deux; c = x=y'), { a: '1', b: 'deux', c: 'x=y' });
   assert.deepEqual(parseInputs('{"a": 1}'), { a: 1 });
   assert.deepEqual(parseInputs(''), {});
   assert.equal(parseInputs('[1]'), null);
   assert.equal(parseInputs('no equal sign'), null);
-  assert.deepEqual(parseInputs('summary=Line one\nline two; and more\nroom=x'), {
-    summary: 'Line one\nline two; and more',
+  assert.deepEqual(parseInputs('summary=Line one\nNote: two; and more\nroom=x'), {
+    summary: 'Line one\nNote: two; and more',
     room: 'x',
   });
   assert.deepEqual(

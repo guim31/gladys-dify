@@ -435,12 +435,15 @@ export class DifyClient {
       foldEvents(parseSse(`${buffer}\n\n`).events, result);
       // A stream cut before the end of the run (Dify restarted, a proxy
       // closed it): the answer may be partial, not a success.
-      if (!result.finished && !result.failure) {
+      // A chatflow ends on workflow_finished, after message_end.
+      const ended = mode === APP_MODES.ADVANCED_CHAT ? result.status !== null : result.finished;
+      if (!ended && !result.failure) {
         const cut = new DifyError(
           ERROR_KINDS.RUN_FAILED,
           `POST ${path}: stream ended before the run`,
         );
         cut.taskId = result.taskId;
+        cut.detail = 'stream cut';
         throw cut;
       }
       return result;

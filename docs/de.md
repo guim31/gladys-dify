@@ -129,7 +129,7 @@ Zeitüberschreitung) erscheint rot mit seinem Grund.
 
 - Nur Text: weder Bild noch Datei in den Eingaben.
 - Gladys wartet höchstens zwei Minuten auf eine Aktion; die Integration bittet Dify dann, die
-  Ausführung zu stoppen. Die Antwort ist auf 10 000 Zeichen begrenzt.
+  Ausführung zu stoppen. Die Antwort ist auf 10 000 Zeichen begrenzt; **Alle Ausgaben (JSON)** bleibt darüber leer.
 - Jede Ausführung läuft für den Dify-Benutzer `gladys`: Deine Szenen teilen sich die
   Unterhaltungen.
 - Kontingente und Preise sind die deiner Modellanbieter (und deines Dify-Cloud-Tarifs). Das

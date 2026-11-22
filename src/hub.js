@@ -106,7 +106,7 @@ export function parseConversation(raw) {
 
 /**
  * The inputs typed in a scene: a JSON object, or `name=value` pairs, one per
- * line or separated by `;` (`name: value` too). null when not understood.
+ * line or separated by `;`. null when not understood.
  * @returns {Record<string, unknown>|null}
  */
 export function parseInputs(raw) {
@@ -126,13 +126,13 @@ export function parseInputs(raw) {
     }
   }
   const inputs = {};
-  // A new pair starts only at `name=` (or `name:`): a value may hold a line
+  // A new pair starts only at `name=`: a value may hold a line
   // break or a `;` (an answer of a previous action inserted with {{…}}).
-  for (const part of text.split(/(?:\r?\n|;)(?=\s*[A-Za-z_][\w-]*\s*[=:])/)) {
+  for (const part of text.split(/(?:\r?\n|;)(?=\s*[A-Za-z_][\w-]*\s*=)/)) {
     if (!part.trim()) {
       continue;
     }
-    const match = part.match(/^\s*([A-Za-z_][\w-]*)\s*[=:]\s*(.*?)\s*$/s);
+    const match = part.match(/^\s*([A-Za-z_][\w-]*)\s*=\s*(.*?)\s*$/s);
     if (!match) {
       return null;
     }
@@ -688,6 +688,11 @@ export class DifyHub {
     if (fitting.length === 1) {
       return fitting[0];
     }
+    // The only app of the right kind has its key refused: say so.
+    const refused = apps.find((app) => fits(app.info.mode) && app.error);
+    if (fitting.length === 0 && refused) {
+      throw new ActionFailure(ERROR_TEXT[refused.error.kind]);
+    }
     throw new ActionFailure(fitting.length === 0 ? ACTION_TEXT.noFittingApp : ACTION_TEXT.whichApp);
   }
 
@@ -864,7 +869,7 @@ export class DifyHub {
     if (kind === 'workflow') {
       // Cut JSON is no JSON: too long, the outputs stay in Dify (the answer holds the start).
       const all = JSON.stringify(result.outputs ?? {});
-      outputs.outputs = all.length <= MAX_ANSWER_CHARACTERS ? all : '{}';
+      outputs.outputs = all.length <= MAX_ANSWER_CHARACTERS ? all : '';
     } else {
       outputs.conversation_id = result.conversationId ?? '';
     }

@@ -119,7 +119,7 @@ missing input, run in error, timeout) shows in red with its reason.
 
 - Text only: no image nor file in the inputs.
 - Gladys waits two minutes at most for an action; the integration then asks Dify to stop the
-  run. The answer is capped at 10 000 characters.
+  run. The answer is capped at 10 000 characters; **All outputs (JSON)** stays empty beyond.
 - Every run is made for the Dify user `gladys`: the conversations are shared by your scenes.
 - The quotas and prices are the ones of your model providers (and of your Dify Cloud plan).
   Checking an app costs no token.
